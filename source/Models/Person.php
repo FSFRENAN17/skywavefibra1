@@ -13,6 +13,7 @@ class Person extends Model
     public function __construct()
     {
         parent::__construct("person", ["id"], ["full_name", "document", "person_type"]);
+        $this->person_type = "individual";
     }
 
     public function bootstrap(

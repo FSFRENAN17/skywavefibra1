@@ -67,12 +67,35 @@ $route->delete('/equipamento/{id}', 'App:deleteEquipment');
 
 
 // Usuários
-$route->get('/usuarios',            'App:users');
-$route->get('/usuarios/{id}',       'App:user');
-$route->get('/usuarios/nova',       'App:user');
+$route->get('/usuarios', 'App:users');
+$route->get("/usuarios/{page}/{limit}", "App:users");
+
+$route->get('/usuario/{id}',       'App:user');
+$route->get('/usuario/criar',       'App:user');
+
+
+$route->post('/users', 'App:users');
 
 $route->post('/users/save',         'App:saveUserPost');
+
 $route->post('/users/roles',        'App:saveUserRolesPost');
+
+// CLientes
+$route->get('/clientes', 'App:customers');
+
+// Página para gerenciar/associar cliente — vamos abrir a mesma view para buscar por CPF
+$route->get('/cliente/{id}', 'App:clientForm'); // caso queira editar por id do person/customer
+$route->get('/cliente/novo', 'App:clientForm');
+
+// AJAX: busca por CPF (POST)
+$route->post('/clientes/buscar', 'App:searchClientByCpf');
+
+// AJAX: salvar cliente / alocar equipamento / definir plano
+$route->post('/clientes/save', 'App:saveCustomer');
+
+
+
+// Perfil
 
 $route->get('/perfil', 'App:profile');
 $route->post("/profile-save", "App:profileSave");

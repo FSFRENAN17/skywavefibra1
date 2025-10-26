@@ -61,6 +61,41 @@ class Account extends Model
         return $find->fetch();
     }
 
+    // Dentro de Source\Models\Account.php
+    public function userType(): array
+    {
+        $person = $this->person();
+        if (!$person) {
+            return ['Usuário', 'secondary'];
+        }
+
+        $personId = $person->id;
+
+        $isCustomer = (new \Source\Models\App\Customer())
+            ->find("person_id = :pid", "pid={$personId}")
+            ->count() > 0;
+
+        $isEmployee = (new \Source\Models\App\Employee())
+            ->find("person_id = :pid", "pid={$personId}")
+            ->count() > 0;
+
+        // --- Decisões ---
+        if ($isCustomer && $isEmployee) {
+            return ['Cliente e Colaborador', 'info'];
+        }
+
+        if ($isEmployee) {
+            return ['Colaborador', 'primary'];
+        }
+
+        if ($isCustomer) {
+            return ['Cliente', 'success'];
+        }
+
+        return ['Usuário', 'secondary'];
+    }
+
+
     /**
      * Salva ou atualiza credenciais
      */

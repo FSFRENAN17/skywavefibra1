@@ -5,7 +5,7 @@
         <!--begin::Menu-->
         <div class="menu menu-rounded menu-column menu-lg-row menu-active-bg menu-title-gray-600 menu-state-gray-900 menu-arrow-gray-500 fw-semibold fw-semibold fs-6 align-items-stretch my-5 my-lg-0 px-2 px-lg-0" id="#kt_app_header_menu" data-kt-menu="true">
             <!--begin:Menu item-->
-            <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="-220,0" class="menu-item here show menu-here-bg menu-lg-down-accordion me-0 me-lg-2">
+            <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="-220,0" class="<?= isset($activeMenu) && $activeMenu == "cliente" ? "here" : "" ?> menu-item show menu-lg-down-accordion me-0 me-lg-2">
                 <!--begin:Menu link-->
                 <span class="menu-link">
                     <span class="menu-icon">
@@ -169,7 +169,7 @@
             </div>
             <!--end:Menu item-->
             <!--begin:Menu item-->
-            <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="-400,0" class="menu-item menu-lg-down-accordion me-0 me-lg-2">
+            <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="-400,0" class="<?= isset($activeMenu) && $activeMenu == "admin" ? "here" : "" ?> menu-item menu-lg-down-accordion me-0 me-lg-2">
                 <!--begin:Menu link-->
                 <span class="menu-link">
                     <span class="menu-icon">
@@ -219,10 +219,10 @@
                                                 <!--begin:Menu item-->
                                                 <div class="menu-item p-0 m-0">
                                                     <!--begin:Menu link-->
-                                                    <a href="account/settings.html" class="menu-link">
+                                                    <a href="<?= url("app/clientes") ?>" class="menu-link">
                                                         <span class="menu-title fw-bold text-info">
                                                             <i class="fa fa-search me-2"></i>
-                                                            Buscar Cliente
+                                                            Listar Cliente
                                                         </span>
                                                     </a>
                                                     <!--end:Menu link-->
@@ -231,7 +231,7 @@
                                                 <!--begin:Menu item-->
                                                 <div class="menu-item p-0 m-0">
                                                     <!--begin:Menu link-->
-                                                    <a href="account/overview.html" class="menu-link">
+                                                    <a href="<?= url("/app/cliente/novo") ?>" class="menu-link">
                                                         <span class="menu-title">Cadastrar Novo Cliente</span>
                                                     </a>
                                                     <!--end:Menu link-->
@@ -265,7 +265,7 @@
                                                 <!--begin:Menu item-->
                                                 <div class="menu-item p-0 m-0">
                                                     <!--begin:Menu link-->
-                                                    <a href="account/settings.html" class="menu-link">
+                                                    <a href="<?= url("app/equipamentos") ?>" class="menu-link">
                                                         <span class="menu-title fw-bold text-info text-nowrap">
                                                             <i class="fa fa-list me-2"></i>
                                                             Listar Equipamentos
@@ -277,7 +277,7 @@
                                                 <!--begin:Menu item-->
                                                 <div class="menu-item p-0 m-0">
                                                     <!--begin:Menu link-->
-                                                    <a href="account/overview.html" class="menu-link">
+                                                    <a href="<?= url("app/equipamento/novo") ?>" class="menu-link">
                                                         <span class="menu-title">Cadastrar Equipamento</span>
                                                     </a>
                                                     <!--end:Menu link-->
@@ -311,7 +311,7 @@
                                                 <!--begin:Menu item-->
                                                 <div class="menu-item p-0 m-0">
                                                     <!--begin:Menu link-->
-                                                    <a href="account/settings.html" class="menu-link">
+                                                    <a href="<?= url("app/funcionarios") ?>" class="menu-link">
                                                         <span class="menu-title fw-bold text-info text-nowrap">
                                                             <i class="fa fa-list me-2"></i>
                                                             Listar Funcionários
@@ -344,18 +344,43 @@
             </div>
             <!--end:Menu item-->
             <!--begin:Menu item-->
-            <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="22,0" class="menu-item menu-lg-down-accordion menu-sub-lg-down-indention me-0 me-lg-2">
+            <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="22,0" class="<?= isset($activeMenu) && $activeMenu == "sistema" ? "here" : "" ?> menu-item menu-lg-down-accordion menu-sub-lg-down-indention me-0 me-lg-2">
                 <!--begin:Menu link-->
                 <span class="menu-link">
                     <span class="menu-icon">
                         <i class="ki-outline ki-setting-2"></i>
                     </span>
-                    <span class="menu-title">Doc</span>
+                    <span class="menu-title">Sistema</span>
                     <span class="menu-arrow d-lg-none"></span>
                 </span>
                 <!--end:Menu link-->
                 <!--begin:Menu sub-->
                 <div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown px-lg-2 py-lg-4 w-lg-200px">
+                    <!--begin:Menu item-->
+                    <div class="menu-item">
+                        <!--begin:Menu link-->
+                        <a class="menu-link" href="<?= url("app/usuarios?clear=1") ?>">
+                            <span class="menu-icon">
+                                <i class="ki-outline ki-people fs-2"></i>
+                            </span>
+                            <span class="menu-title">Usuários</span>
+                        </a>
+                        <!--end:Menu link-->
+                    </div>
+                    <!--end:Menu item-->
+                    <!--begin:Menu item-->
+                    <div class="menu-item">
+                        <!--begin:Menu link-->
+                        <a class="menu-link" href="<?= url("app/planos") ?>">
+                            <span class="menu-icon">
+                                <i class="ki-outline ki-tablet-text-down fs-2"></i>
+                            </span>
+                            <span class="menu-title">Planos</span>
+                        </a>
+                        <!--end:Menu link-->
+                    </div>
+                    <!--end:Menu item-->
+                    <div class="menu-separator border my-3"></div>
                     <!--begin:Menu item-->
                     <div class="menu-item">
                         <!--begin:Menu link-->
