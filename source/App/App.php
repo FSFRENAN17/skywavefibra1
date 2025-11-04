@@ -5,6 +5,7 @@ namespace Source\App;
 use Source\Core\Controller;
 use Source\Models\Account;
 use Source\Models\App\Equipment;
+use Source\Models\App\Plan;
 use Source\Models\Auth;
 use Source\Models\Report\Access;
 use Source\Models\Report\Online;
@@ -84,140 +85,569 @@ class App extends Controller
         ]);
     }
 
-    /** APP | Equipamentos */
-
-    public function equipments(): void
+    // Equipamentos
+    public function equipments(?array $data): void
     {
-        $this->renderPage("equipments", [
-            "active"      => "equipments",
-            "title"       => "Equipamentos",
-            "subtitle"    => "Gerencie seus equipamentos",
-            "equipments" => (new Equipment())->find()->fetch(true) ?? [],
-        ]);
-    }
+        $session = new \Source\Core\Session();
 
+        // 🔹 1. Se for POST: salva busca e redireciona
+        if ($_SERVER["REQUEST_METHOD"] === "POST") {
+            $search = trim($data["search"] ?? "");
 
-    public function equipment(): void
-    {
-        $this->renderPage("equipment", [
-            "active"      => "equipment",
-            "title"       => "Equipamentos",
-            "subtitle"    => "Gerencie seus equipamentos",
-        ]);
-    }
+            if ($search !== "") {
+                $session->set("equipment_search", $search);
+            } else {
+                $session->unset("equipment_search");
+            }
 
-    /**
-     * APP | Edita Equipamento
-     * @param array $data
-     * @return void
-     */
-    public function editEquipment(array $data): void
-    {
-        $equipmentId = filter_var($data['id'], FILTER_VALIDATE_INT);
-        $equipment = (new Equipment())->findById($equipmentId);
-
-        if (!$equipment) {
-            $this->message->error("Equipamento não encontrado!")->toast()->flash();
-            redirect("/app/equipamentos");
-        }
-
-        $this->renderPage("editEquipment", [
-            "active"      => "equipments",
-            "title"       => "Editar Equipamento",
-            "subtitle"    => "Edite os dados do equipamento",
-            "equipment"   => $equipment
-        ]);
-    }
-
-    /**
-     * APP | Salva ou Atualiza Equipamento
-     * @param array $data
-     * @return void
-     */
-    public function saveEquipment(array $data): void
-    {
-        $data = filter_var_array($data, FILTER_UNSAFE_RAW);
-
-        $equipmentId = null;
-        if (!empty($data['id']) && $data['_method'] === 'PUT') {
-            $equipmentId = filter_var($data['id'], FILTER_VALIDATE_INT);
-        }
-
-        $equipment = ($equipmentId ? (new Equipment())->findById($equipmentId) : new Equipment());
-
-        if (!$equipment) {
-            jsonResponse([
-                "success" => false,
-                "message" => $this->message->error("Equipamento não encontrado para atualização.")->toast()->render()
-            ]);
+            echo json_encode(["redirect" => url("/app/equipamentos")]);
             return;
         }
 
-        $equipment->type = $data['type'] ?? '';
-        $equipment->manufacturer = $data['manufacturer'] ?? '';
-        $equipment->model = $data['model'] ?? '';
-        $equipment->serial_number = $data['serial_number'] ?? '';
-        $equipment->status = $data['status'] ?? '';
+        // 🔹 2. Se vier GET com ?clear=1, limpa a busca
+        if (!empty($_GET["clear"])) {
+            $session->unset("equipment_search");
+        }
+
+        // 🔹 3. Busca persistente
+        $search = $session->has("equipment_search") ? $session->equipment_search : "";
+
+        // 🔹 4. Paginação
+        $page  = (int)($data["page"] ?? 1);
+        $limit = (int)($data["limit"] ?? 10);
+
+        // 🔹 5. Query
+        $equipmentModel = new \Source\Models\App\Equipment();
+
+        if (!empty($search)) {
+            $query = $equipmentModel->find(
+                "(manufacturer LIKE CONCAT('%', :search, '%')
+              OR model LIKE CONCAT('%', :search, '%')
+              OR serial_number LIKE CONCAT('%', :search, '%'))",
+                "search={$search}"
+            );
+        } else {
+            $query = $equipmentModel->find();
+        }
+
+        $total = $query->count();
+        $equipments = $query->limit($limit)->offset(($page - 1) * $limit)->fetch(true);
+        $pages = ceil($total / $limit);
+
+        $this->renderPage("equipments/main", [
+            "title"      => "Equipamentos",
+            "equipments" => $equipments,
+            "search"     => $search,
+            "page"       => $page,
+            "pages"      => $pages,
+            "limit"      => $limit,
+            "total"      => $total,
+            "activeMenu" => "admin"
+        ]);
+    }
+
+    public function equipment(?array $data): void
+    {
+        $isEdit = false;
+        $equipment = new \Source\Models\App\Equipment();
+
+        // 🔹 Edição
+        if (!empty($data["id"])) {
+            $equipment = (new \Source\Models\App\Equipment())->findById((int)$data["id"]);
+            if (!$equipment) {
+                (new \Source\Support\Message())->error("Equipamento não encontrado.")->flash();
+                redirect("/app/equipamentos");
+                return;
+            }
+
+            $isEdit = true;
+        }
+
+        $this->renderPage("equipments/form", [
+            "title"       => $isEdit ? "Editar Equipamento" : "Novo Equipamento",
+            "subtitle"    => $isEdit ? "Atualize as informações do equipamento" : "Cadastre um novo equipamento",
+            "equipment"   => $equipment,
+            "isEdit"      => $isEdit,
+            "activeMenu"  => "admin"
+        ]);
+    }
+
+    public function saveEquipmentPost(?array $data): void
+    {
+        $json = [];
+
+        // 🔹 Edição ou novo
+        if (!empty($data["id"])) {
+            $equipment = (new \Source\Models\App\Equipment())->findById($data["id"]);
+            if (!$equipment) {
+                $json["message"] = (new \Source\Support\Message())
+                    ->error("Equipamento não encontrado.")
+                    ->toast()
+                    ->render();
+                echo json_encode($json);
+                return;
+            }
+        } else {
+            $equipment = new \Source\Models\App\Equipment();
+        }
+
+        // 🔹 Limpa e prepara dados
+        $type          = $data["type"] ?? null;
+        $manufacturer  = trim($data["manufacturer"] ?? "");
+        $model         = trim($data["model"] ?? "");
+        $serialNumber  = trim($data["serial_number"] ?? "");
+        $status        = $data["status"] ?? "available";
+
+        // 🔹 Verifica duplicidade de serial
+        $serialExists = (new \Source\Models\App\Equipment())
+            ->find("serial_number = :sn AND id != :id", "sn={$serialNumber}&id=" . ($equipment->id ?? 0))
+            ->count();
+
+        if ($serialExists > 0) {
+            $json["message"] = (new \Source\Support\Message())
+                ->warning("O número de série informado já está cadastrado.")
+                ->toast()
+                ->render();
+            echo json_encode($json);
+            return;
+        }
+
+        // 🔹 Atualiza / cria
+        $equipment->type          = $type;
+        $equipment->manufacturer  = $manufacturer;
+        $equipment->model         = $model;
+        $equipment->serial_number = $serialNumber;
+        $equipment->status        = $status;
 
         if (!$equipment->save()) {
-            jsonResponse([
-                "success" => false,
-                "message" => ($equipment->message() ?: $this->message)
-                    ->error("Erro ao salvar o equipamento.")->toast()->render()
-            ]);
+            $json["message"] = $equipment->message()->toast()->render();
+            echo json_encode($json);
             return;
         }
 
-        $message = $equipmentId ? "Equipamento atualizado com sucesso!" : "Equipamento cadastrado com sucesso!";
-        $this->message->success($message)->toast()->flash();
+        $json["message"] = (new \Source\Support\Message())
+            ->success("Equipamento " . (!empty($data["id"]) ? "atualizado" : "criado") . " com sucesso!")
+            ->toast()
+            ->render();
 
-        jsonResponse([
-            "success"  => true,
-            "message"  => $this->message->success($message)->toast()->render(),
-            "redirect" => url("/app/equipamentos")
+        $json["redirect"] = url("/app/equipamentos");
+        echo json_encode($json);
+    }
+
+    public function deleteEquipment(?array $data): void
+    {
+        $id = (int)($data["id"] ?? 0);
+
+        if (!$id) {
+            (new \Source\Support\Message())->error("ID inválido.")->flash();
+            redirect("/app/equipamentos");
+            return;
+        }
+
+        $equipment = (new \Source\Models\App\Equipment())->findById($id);
+        if (!$equipment) {
+            (new \Source\Support\Message())->error("Equipamento não encontrado.")->flash();
+            redirect("/app/equipamentos");
+            return;
+        }
+
+        $equipment->destroy();
+
+        (new \Source\Support\Message())
+            ->success("Equipamento excluído com sucesso!")
+            ->flash();
+
+        redirect("/app/equipamentos");
+    }
+
+    // public function equipments(): void
+    // {
+    //     $this->renderPage("equipments", [
+    //         "active"      => "equipments",
+    //         "title"       => "Equipamentos",
+    //         "subtitle"    => "Gerencie seus equipamentos",
+    //         "equipments" => (new Equipment())->find()->fetch(true) ?? [],
+    //     ]);
+    // }
+
+    // public function equipment(): void
+    // {
+    //     $this->renderPage("equipment", [
+    //         "active"      => "equipment",
+    //         "title"       => "Equipamentos",
+    //         "subtitle"    => "Gerencie seus equipamentos",
+    //     ]);
+    // }
+
+    // public function editEquipment(array $data): void
+    // {
+    //     $equipmentId = filter_var($data['id'], FILTER_VALIDATE_INT);
+    //     $equipment = (new Equipment())->findById($equipmentId);
+
+    //     if (!$equipment) {
+    //         $this->message->error("Equipamento não encontrado!")->toast()->flash();
+    //         redirect("/app/equipamentos");
+    //     }
+
+    //     $this->renderPage("editEquipment", [
+    //         "active"      => "equipments",
+    //         "title"       => "Editar Equipamento",
+    //         "subtitle"    => "Edite os dados do equipamento",
+    //         "equipment"   => $equipment
+    //     ]);
+    // }
+
+    // public function saveEquipment(array $data): void
+    // {
+    //     $data = filter_var_array($data, FILTER_UNSAFE_RAW);
+
+    //     $equipmentId = null;
+    //     if (!empty($data['id']) && $data['_method'] === 'PUT') {
+    //         $equipmentId = filter_var($data['id'], FILTER_VALIDATE_INT);
+    //     }
+
+    //     $equipment = ($equipmentId ? (new Equipment())->findById($equipmentId) : new Equipment());
+
+    //     if (!$equipment) {
+    //         jsonResponse([
+    //             "success" => false,
+    //             "message" => $this->message->error("Equipamento não encontrado para atualização.")->toast()->render()
+    //         ]);
+    //         return;
+    //     }
+
+    //     $equipment->type = $data['type'] ?? '';
+    //     $equipment->manufacturer = $data['manufacturer'] ?? '';
+    //     $equipment->model = $data['model'] ?? '';
+    //     $equipment->serial_number = $data['serial_number'] ?? '';
+    //     $equipment->status = $data['status'] ?? '';
+
+    //     if (!$equipment->save()) {
+    //         jsonResponse([
+    //             "success" => false,
+    //             "message" => ($equipment->message() ?: $this->message)
+    //                 ->error("Erro ao salvar o equipamento.")->toast()->render()
+    //         ]);
+    //         return;
+    //     }
+
+    //     $message = $equipmentId ? "Equipamento atualizado com sucesso!" : "Equipamento cadastrado com sucesso!";
+    //     $this->message->success($message)->toast()->flash();
+
+    //     jsonResponse([
+    //         "success"  => true,
+    //         "message"  => $this->message->success($message)->toast()->render(),
+    //         "redirect" => url("/app/equipamentos")
+    //     ]);
+    // }
+
+    // public function deleteEquipment(array $data): void
+    // {
+    //     $equipmentId = filter_var($data['id'], FILTER_VALIDATE_INT);
+    //     $equipment = (new Equipment())->findById($equipmentId);
+
+    //     if (!$equipment) {
+    //         jsonResponse([
+    //             "success" => false,
+    //             "message" => $this->message->error("Equipamento não encontrado para exclusão.")->toast()->render()
+    //         ]);
+    //         return;
+    //     }
+
+    //     if (!$equipment->destroy()) {
+    //         jsonResponse([
+    //             "success" => false,
+    //             "message" => ($equipment->message() ?: $this->message)
+    //                 ->error("Erro ao excluir o equipamento.")->toast()->render()
+    //         ]);
+    //         return;
+    //     }
+
+    //     $this->message->success("Equipamento excluído com sucesso!")->toast()->flash();
+
+    //     jsonResponse([
+    //         "success"  => true,
+    //         "message"  => $this->message->success("Equipamento excluído com sucesso!")->toast()->render(),
+    //         "redirect" => url("/app/equipamentos")
+    //     ]);
+    // }
+
+    //Funcionários
+    // Funcionários
+    public function employees(?array $data): void
+    {
+        $session = new \Source\Core\Session();
+
+        // 🔹 1. POST → salva busca e redireciona
+        if ($_SERVER["REQUEST_METHOD"] === "POST") {
+            $search = trim($data["search"] ?? "");
+
+            if ($search !== "") {
+                $session->set("employee_search", $search);
+            } else {
+                $session->unset("employee_search");
+            }
+
+            echo json_encode(["redirect" => url("/app/funcionarios")]);
+            return;
+        }
+
+        // 🔹 2. Limpa busca
+        if (!empty($_GET["clear"])) {
+            $session->unset("employee_search");
+        }
+
+        // 🔹 3. Busca persistente
+        $search = $session->has("employee_search") ? $session->employee_search : "";
+
+        // 🔹 4. Paginação
+        $page  = (int)($data["page"] ?? 1);
+        $limit = (int)($data["limit"] ?? 10);
+
+        // 🔹 5. Query
+        $employeeModel = new \Source\Models\App\Employee();
+
+        if (!empty($search)) {
+            $query = $employeeModel->find(
+                "person_id IN (
+                SELECT id FROM person 
+                WHERE full_name LIKE CONCAT('%', :search, '%') 
+                OR document LIKE CONCAT('%', :search, '%')
+            )",
+                "search={$search}"
+            );
+        } else {
+            $query = $employeeModel->find();
+        }
+
+        $total = $query->count();
+        $employees = $query->limit($limit)->offset(($page - 1) * $limit)->fetch(true);
+        $pages = ceil($total / $limit);
+
+        $this->renderPage("employees/main", [
+            "title"      => "Funcionários",
+            "employees"  => $employees,
+            "search"     => $search,
+            "page"       => $page,
+            "pages"      => $pages,
+            "limit"      => $limit,
+            "total"      => $total,
+            "activeMenu" => "sistema"
         ]);
     }
 
-    // Usuários
+    public function employee(?array $data): void
+    {
+        $isEdit = false;
+        $employee = new \Source\Models\App\Employee();
+        $person = new \Source\Models\Person();
+        $employee->person = $person;
+
+        if (!empty($data["id"])) {
+            $employee = (new \Source\Models\App\Employee())->findById((int)$data["id"]);
+            if (!$employee) {
+                (new \Source\Support\Message())->error("Funcionário não encontrado.")->flash();
+                redirect("/app/funcionarios");
+                return;
+            }
+
+            $isEdit = true;
+            $person = $employee->person();
+            $employee->person = $person;
+        }
+
+        $this->renderPage("employees/form", [
+            "title"       => $isEdit ? "Editar Funcionário" : "Novo Funcionário",
+            "subtitle"    => $isEdit ? "Atualize as informações do funcionário" : "Cadastre um novo funcionário",
+            "employee"    => $employee,
+            "isEdit"      => $isEdit,
+            "activeMenu"  => "sistema"
+        ]);
+    }
+
+    public function saveEmployeePost(?array $data): void
+    {
+        $json = [];
+
+        if (!empty($data["person_id"])) {
+            $employee = (new \Source\Models\App\Employee())->findById($data["person_id"]);
+            if (!$employee) {
+                $json["message"] = (new \Source\Support\Message())
+                    ->error("Funcionário não encontrado.")
+                    ->toast()
+                    ->render();
+                echo json_encode($json);
+                return;
+            }
+            $person = $employee->person();
+        } else {
+            $employee = new \Source\Models\App\Employee();
+            $person = new \Source\Models\Person();
+        }
+
+        // 🔹 Dados da pessoa
+        $fullName   = trim($data["full_name"] ?? "");
+        $document   = preg_replace("/\D/", "", $data["document"] ?? "");
+        $birthDate  = !empty($data["birth_date"]) ? $data["birth_date"] : null;
+
+        // 🔹 Dados do funcionário
+        $role       = $data["role"] ?? "support";
+        $roleName   = trim($data["role_name"] ?? "");
+        $hireDate   = $data["hire_date"] ?? date("Y-m-d");
+        $status     = $data["status"] ?? "active";
+
+        // 🔹 Verifica duplicidade de documento
+        $docExists = (new \Source\Models\Person())
+            ->find("document = :d AND id != :id", "d={$document}&id=" . ($person->id ?? 0))
+            ->count();
+
+        if ($docExists > 0) {
+            $json["message"] = (new \Source\Support\Message())
+                ->warning("O documento informado já está cadastrado.")
+                ->toast()
+                ->render();
+            echo json_encode($json);
+            return;
+        }
+
+        // 🔹 Salva pessoa
+        $person->full_name  = $fullName;
+        $person->document   = $document;
+        $person->birth_date = $birthDate;
+
+        if (!$person->save()) {
+            $json["message"] = $person->message()->toast()->render();
+            echo json_encode($json);
+            return;
+        }
+
+        // 🔹 Salva funcionário
+        $employee->person_id = $person->id;
+        $employee->role       = $role;
+        $employee->role_name  = $roleName;
+        $employee->hire_date  = $hireDate;
+        $employee->status     = $status;
+
+        if (!$employee->save()) {
+            $json["message"] = $employee->message()->toast()->render();
+            echo json_encode($json);
+            return;
+        }
+
+        $json["message"] = (new \Source\Support\Message())
+            ->success("Funcionário " . (!empty($data["person_id"]) ? "atualizado" : "cadastrado") . " com sucesso!")
+            ->toast()
+            ->render();
+
+        $json["redirect"] = url("/app/funcionarios");
+        echo json_encode($json);
+    }
+
+    public function deleteEmployee(?array $data): void
+    {
+        $id = (int)($data["id"] ?? 0);
+
+        if (!$id) {
+            (new \Source\Support\Message())->error("ID inválido.")->flash();
+            redirect("/app/funcionarios");
+            return;
+        }
+
+        $employee = (new \Source\Models\App\Employee())->findById($id);
+        if (!$employee) {
+            (new \Source\Support\Message())->error("Funcionário não encontrado.")->flash();
+            redirect("/app/funcionarios");
+            return;
+        }
+
+        $employee->destroy();
+
+        (new \Source\Support\Message())
+            ->success("Funcionário excluído com sucesso!")
+            ->flash();
+
+        redirect("/app/funcionarios");
+    }
 
     /**
-     * APP | Exclui Equipamento
-     * @param array $data
-     * @return void
+     * Página para associar pessoa existente a um funcionário
      */
-    public function deleteEquipment(array $data): void
+    public function employeeAssign(?array $data): void
     {
-        $equipmentId = filter_var($data['id'], FILTER_VALIDATE_INT);
-        $equipment = (new Equipment())->findById($equipmentId);
+        // Busca todas as pessoas que ainda não são funcionários
+        $persons = (new \Source\Models\Person())
+            ->find("id NOT IN (SELECT person_id FROM employee)", "", "id, full_name, document")
+            ->fetch(true);
 
-        if (!$equipment) {
-            jsonResponse([
-                "success" => false,
-                "message" => $this->message->error("Equipamento não encontrado para exclusão.")->toast()->render()
-            ]);
-            return;
-        }
-
-        if (!$equipment->destroy()) {
-            jsonResponse([
-                "success" => false,
-                "message" => ($equipment->message() ?: $this->message)
-                    ->error("Erro ao excluir o equipamento.")->toast()->render()
-            ]);
-            return;
-        }
-
-        $this->message->success("Equipamento excluído com sucesso!")->toast()->flash();
-
-        jsonResponse([
-            "success"  => true,
-            "message"  => $this->message->success("Equipamento excluído com sucesso!")->toast()->render(),
-            "redirect" => url("/app/equipamentos")
+        $this->renderPage("employees/assign", [
+            "title"      => "Associar Pessoa a Funcionário",
+            "subtitle"   => "Selecione uma pessoa existente e defina as informações do vínculo como funcionário",
+            "persons"    => $persons,
+            "activeMenu" => "sistema"
         ]);
     }
 
-    // Usuários
+    /**
+     * POST para salvar associação pessoa → funcionário
+     */
+    public function saveEmployeeAssignPost(?array $data): void
+    {
+        $json = [];
 
+        $personId  = (int)($data["person_id"] ?? 0);
+        $role      = $data["role"] ?? "support";
+        $roleName  = trim($data["role_name"] ?? "");
+        $hireDate  = $data["hire_date"] ?? date("Y-m-d");
+        $status    = $data["status"] ?? "active";
+
+        // Verifica se a pessoa existe
+        $person = (new \Source\Models\Person())->findById($personId);
+        if (!$person) {
+            $json["message"] = (new \Source\Support\Message())
+                ->error("Pessoa não encontrada.")
+                ->toast()
+                ->render();
+            echo json_encode($json);
+            return;
+        }
+
+        // Verifica se já é funcionário
+        $exists = (new \Source\Models\App\Employee())->findById($personId);
+        if ($exists) {
+            $json["message"] = (new \Source\Support\Message())
+                ->warning("Essa pessoa já está registrada como funcionário.")
+                ->toast()
+                ->render();
+            echo json_encode($json);
+            return;
+        }
+
+        // Cria vínculo
+        $employee = new \Source\Models\App\Employee();
+        $employee->person_id = $personId;
+        $employee->role      = $role;
+        $employee->role_name = $roleName;
+        $employee->hire_date = $hireDate;
+        $employee->status    = $status;
+
+        if (!$employee->save()) {
+            var_dump($employee);
+            $json["message"] = $employee->message()->toast()->render();
+            echo json_encode($json);
+            return;
+        }
+
+        $json["message"] = (new \Source\Support\Message())
+            ->success("Funcionário associado com sucesso!")
+            ->toast()
+            ->render();
+
+        $json["redirect"] = url("/app/funcionarios");
+        echo json_encode($json);
+    }
+
+
+    // Usuários
     public function users(?array $data): void
     {
         $session = new \Source\Core\Session();
@@ -310,7 +740,6 @@ class App extends Controller
             "activeMenu" => "sistema"
         ]);
     }
-
 
     public function saveUserPost(?array $data): void
     {
@@ -409,8 +838,7 @@ class App extends Controller
         echo json_encode($json);
     }
 
-
-    /** APP | Perfil */
+    // Perfil
     public function profile(): void
     {
         $this->renderPage("profile/main", [
@@ -512,6 +940,17 @@ class App extends Controller
         echo json_encode($json);
     }
 
+    // Clientes
+    public function customers(): void
+    {
+        $this->renderPage("customers/main", [
+            "active"      => "customers",
+            "title"       => "Clientes",
+            "subtitle"    => "Gerencie seus clientes",
+            "activeMenu"  => "admin"
+        ]);
+    }
+
     public function searchClientByCpf(?array $data): void
     {
         $json = [];
@@ -604,9 +1043,6 @@ class App extends Controller
         echo json_encode($json);
     }
 
-    /**
-     * Página de criação/edição de cliente
-     */
     public function clientForm(?array $data): void
     {
         // 🔹 1. Dados iniciais
@@ -663,7 +1099,6 @@ class App extends Controller
             "activeMenu"         => "admin"
         ]);
     }
-
 
     public function saveCustomer(?array $data): void
     {
@@ -749,6 +1184,103 @@ class App extends Controller
         echo json_encode($json);
     }
 
+
+    // Planos
+    public function plans(): void
+    {
+
+        $page  = isset($data["page"]) ? (int)$data["page"] : 1;
+        $limit = isset($data["limit"]) ? (int)$data["limit"] : 10;
+        $search = $data["search"] ?? null;
+
+        $plan = new Plan();
+
+        if ($search) {
+            $plans = $plan->find("name LIKE :s", "s=%{$search}%")->limit($limit)->offset(($page - 1) * $limit)->fetch(true);
+            $total = $plan->find("name LIKE :s", "s=%{$search}%")->count();
+        } else {
+            $plans = $plan->find()->limit($limit)->offset(($page - 1) * $limit)->fetch(true);
+            $total = $plan->find()->count();
+        }
+
+        $pages = ceil($total / $limit);
+
+        $this->renderPage("plans/main", [
+            "plans"  => $plans,
+            "page"   => $page,
+            "pages"  => $pages,
+            "limit"  => $limit,
+            "search" => $search,
+            "total"  => $total,
+            "active"      => "plans",
+            "title"       => "Planos",
+            "subtitle"    => "Gerencie seus planos",
+            "activeMenu"  => "sistema"
+        ]);
+    }
+
+    public function planForm(?array $data): void
+    {
+        $isEdit = false;
+        $plan = null;
+
+        // Edição
+        if (!empty($data["id"])) {
+            $plan = (new Plan())->findById((int)$data["id"]);
+            if (!$plan) {
+                $this->message->warning("Plano não encontrado.")->toast()->flash();
+                redirect("/app/planos");
+                return;
+            }
+            $isEdit = true;
+        } else {
+            // Criação
+            $plan = new Plan();
+        }
+
+        $this->renderPage("plans/form", [
+            "title"    => $isEdit ? "Editar Plano" : "Novo Plano",
+            "subtitle" => $isEdit ? "Atualize as informações do plano" : "Cadastre um novo plano",
+            "plan"     => $plan,
+            "isEdit"   => $isEdit,
+            "activeMenu" => "sistema"
+        ]);
+    }
+
+    public function savePlan(array $data): void
+    {
+        if (!empty($data["id"])) {
+            $plan = (new Plan())->findById((int)$data["id"]);
+            if (!$plan) {
+                $this->message->error("Plano não encontrado.")->toast()->flash();
+                $json["redirect"] = url("/app/planos");
+                echo json_encode($json);
+                return;
+            }
+        } else {
+            $plan = new Plan();
+        }
+
+        if (!empty($data)) {
+            $plan->bootstrap(
+                $data["name"],
+                (int)$data["download_speed"],
+                (int)$data["upload_speed"],
+                (float)$data["price"],
+                !empty($data["data_cap"]) ? (int)$data["data_cap"] : null,
+                $data["description"] ?? null
+            );
+
+            if (!$plan->save()) {
+                $this->message->error("Erro ao salvar o plano: " . $plan->message()->getText())->toast()->render();
+                return;
+            }
+
+            $json["message"] = $this->message->success("Plano salvo com sucesso!")->toast()->flash();
+            $json["redirect"] = url("/app/planos");
+            echo json_encode($json);
+        }
+    }
 
 
     /** APP | Logout */

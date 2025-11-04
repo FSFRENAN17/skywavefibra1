@@ -10,4 +10,50 @@ class Employee extends Model
     {
         parent::__construct("employee", ["id"], ["person_id", "role", "hire_date"]);
     }
+
+    /**
+     * Retorna a pessoa vinculada ao funcionário
+     */
+    public function person(): ?\Source\Models\Person
+    {
+        return (new \Source\Models\Person())->findById($this->person_id);
+    }
+
+    public function photo(): string
+    {
+        $account = (new \Source\Models\Account())
+            ->find("person_id = :pid", "pid={$this->person_id}")
+            ->fetch();
+
+        return $account ? $account->photo() : url("/shared/assets/images/avatar.jpg");
+    }
+
+
+    /**
+     * Retorna um label e uma cor para o papel (cargo)
+     */
+    public function roleLabel(): array
+    {
+        $roles = [
+            "admin"      => ["Administrador", "danger"],
+            "support"    => ["Atendimento", "info"],
+            "technician" => ["Técnico", "primary"],
+            "finance"    => ["Financeiro", "success"]
+        ];
+
+        return $roles[$this->role] ?? ["Desconhecido", "secondary"];
+    }
+
+    /**
+     * Retorna um label e uma cor para o status
+     */
+    public function statusLabel(): array
+    {
+        $statuses = [
+            "active"     => ["Ativo", "success"],
+            "terminated" => ["Desligado", "danger"]
+        ];
+
+        return $statuses[$this->status] ?? ["Desconhecido", "secondary"];
+    }
 }

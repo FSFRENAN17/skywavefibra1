@@ -250,13 +250,6 @@ use Source\Models\Auth;
 									<!--end::Item-->
 								</ul>
 								<!--end::Breadcrumb-->
-								<!--begin::Page title-->
-								<div class="page-title d-flex align-items-center me-3">
-									<!--begin::Title-->
-									<h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">Dashboard</h1>
-									<!--end::Title-->
-								</div>
-								<!--end::Page title-->
 							</div>
 							<!--end::Toolbar container-->
 						</div>

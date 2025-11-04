@@ -59,12 +59,31 @@ $route->group('/app');
 $route->get('/', 'App:home');
 
 //Equipamentos
-$route->get('/equipamento/{id}', 'App:editEquipment');
-$route->get('/equipamento', 'App:equipment');
-$route->get('/equipamentos', 'App:equipments');
-$route->post('/equipamento', 'App:saveEquipment');
-$route->delete('/equipamento/{id}', 'App:deleteEquipment');
+// $route->get('/equipamentos', 'App:equipments');
+// $route->get('/equipamento/{id}', 'App:editEquipment');
+// $route->get('/equipamento', 'App:equipment');
+// $route->post('/equipamento', 'App:saveEquipment');
+// $route->delete('/equipamento/{id}', 'App:deleteEquipment');
 
+$route->get("/equipamentos", "App:equipments");
+$route->get("/equipamentos/{page}/{limit}", "App:equipments");
+$route->get("/equipamento/{id}", "App:equipment");
+$route->get("/equipamento/criar", "App:equipment");
+$route->get("/equipment/delete/{id}", "App:deleteEquipment");
+
+$route->post("/equipments", "App:equipments");
+$route->post("/equipment/save", "App:saveEquipmentPost");
+
+//Funcionários
+$route->get("/funcionarios", "App:employees");
+$route->get("/funcionarios/{page}/{limit}", "App:employees");
+$route->get("/funcionario/{id}", "App:employee");
+$route->get("/funcionario/associar", "App:employeeAssign");
+$route->get("/funcionario/delete/{id}", "App:deleteEmployee");
+
+$route->post("/funcionarios", "App:employees");
+$route->post("/funcionario/associar/salvar", "App:saveEmployeeAssignPost");
+$route->post("/funcionarios/salvar", "App:saveEmployeePost");
 
 // Usuários
 $route->get('/usuarios', 'App:users');
@@ -79,6 +98,12 @@ $route->post('/users', 'App:users');
 $route->post('/users/save',         'App:saveUserPost');
 
 $route->post('/users/roles',        'App:saveUserRolesPost');
+
+// Planos
+$route->get('/planos', 'App:plans');
+$route->get('/plano/{id}', 'App:planForm'); // editar plano
+$route->get('/plano/novo', 'App:planForm'); // novo plano
+$route->post('/plans/save', 'App:savePlan');
 
 // CLientes
 $route->get('/clientes', 'App:customers');
