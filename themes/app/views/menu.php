@@ -155,11 +155,23 @@
                     <!--begin:Menu item-->
                     <div class="menu-item">
                         <!--begin:Menu link-->
-                        <a class="menu-link" href="apps/calendar.html">
+                        <a class="menu-link" href="<?= url("app/meus-chamados") ?>">
                             <span class="menu-icon">
-                                <i class="ki-outline ki-message-programming fs-2"></i>
+                                <i class="ki-outline ki-message-text-2 fs-2"></i>
                             </span>
-                            <span class="menu-title">Acessar tickets</span>
+                            <span class="menu-title">Meus Chamados</span>
+                        </a>
+                        <!--end:Menu link-->
+                    </div>
+                    <!--end:Menu item-->
+                    <!--begin:Menu item-->
+                    <div class="menu-item">
+                        <!--begin:Menu link-->
+                        <a class="menu-link" href="<?= url("app/criar-chamado") ?>">
+                            <span class="menu-icon">
+                                <i class="ki-outline ki-message-add fs-2"></i>
+                            </span>
+                            <span class="menu-title">Abrir Chamado</span>
                         </a>
                         <!--end:Menu link-->
                     </div>
@@ -199,6 +211,11 @@
                                 <!--begin:Nav item-->
                                 <li class="nav-item mx-lg-1">
                                     <a class="nav-link py-3 py-lg-6 text-active-primary" href="#" data-bs-toggle="tab" data-bs-target="#menu_funcionarios">Funcionários</a>
+                                </li>
+                                <!--end:Nav item-->
+                                <!--begin:Nav item-->
+                                <li class="nav-item mx-lg-1">
+                                    <a class="nav-link py-3 py-lg-6 text-active-primary" href="#" data-bs-toggle="tab" data-bs-target="#menu_chamados">Chamados</a>
                                 </li>
                                 <!--end:Nav item-->
                             </ul>
@@ -316,6 +333,61 @@
                                                             <i class="fa fa-list me-2"></i>
                                                             Listar Funcionários
                                                         </span>
+                                                    </a>
+                                                    <!--end:Menu link-->
+                                                </div>
+                                                <!--end:Menu item-->
+                                            </div>
+                                            <!--end:Col-->
+                                        </div>
+                                        <!--end:Row-->
+                                    </div>
+                                    <!--end:Col-->
+                                    <!--begin:Col-->
+                                    <div class="col-lg-4">
+                                        <img src="assets/media/stock/900x600/46.jpg" class="rounded mw-100" alt="" />
+                                    </div>
+                                    <!--end:Col-->
+                                </div>
+                                <!--end:Row-->
+                            </div>
+                            <!--end:Tab pane-->
+                            <!--begin:Tab pane-->
+                            <div class="tab-pane w-lg-600px" id="menu_chamados">
+                                <!--begin:Row-->
+                                <div class="row">
+                                    <!--begin:Col-->
+                                    <div class="col-lg-8 mb-6 mb-lg-0">
+                                        <!--begin:Row-->
+                                        <div class="row">
+                                            <!--begin:Col-->
+                                            <div class="col-lg-12">
+                                                <!--begin:Menu item-->
+                                                <div class="menu-item p-0 m-0">
+                                                    <!--begin:Menu link-->
+                                                    <a href="<?= url("app/chamados/dashboard") ?>" class="menu-link">
+                                                        <span class="menu-title fw-bold text-info text-nowrap">
+                                                            <i class="ki-outline ki-graph-up me-2"></i>
+                                                            Dashboard de Chamados
+                                                        </span>
+                                                    </a>
+                                                    <!--end:Menu link-->
+                                                </div>
+                                                <!--end:Menu item-->
+                                                <!--begin:Menu item-->
+                                                <div class="menu-item p-0 m-0">
+                                                    <!--begin:Menu link-->
+                                                    <a href="<?= url("app/chamados") ?>" class="menu-link">
+                                                        <span class="menu-title">Chamados Em Aberto</span>
+                                                    </a>
+                                                    <!--end:Menu link-->
+                                                </div>
+                                                <!--end:Menu item-->
+                                                <!--begin:Menu item-->
+                                                <div class="menu-item p-0 m-0">
+                                                    <!--begin:Menu link-->
+                                                    <a href="<?= url("app/chamados/historico") ?>" class="menu-link">
+                                                        <span class="menu-title">Histórico de Chamados</span>
                                                     </a>
                                                     <!--end:Menu link-->
                                                 </div>

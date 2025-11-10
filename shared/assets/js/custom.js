@@ -113,8 +113,8 @@ $("[data-post]").on("click", function (e) {
     }
 })
 
-// AJAX Form
-$("form:not('.ajax-off')").on("submit", function (e) {
+// AJAX Form (exclude forms with class .ajax-off)
+$("form:not(.ajax-off)").on("submit", function (e) {
     e.preventDefault()
     // let data = $(this).serialize();
     let data = new FormData(this);

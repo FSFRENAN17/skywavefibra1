@@ -143,7 +143,7 @@
                             <!--begin::Body-->
                             <div class="card-body p-0">
                                 <!--begin::Items-->
-                                <a href='pages/contact.html' class="btn btn-active-color-primary px-7 py-6 text-start w-100">
+                                <a href='<?= url("app/criar-chamado") ?>' class="btn btn-active-color-primary px-7 py-6 text-start w-100">
                                     <!--begin::Icon-->
                                     <i class="ki-outline ki-rescue fs-2x fs-lg-2hx text-gray-500 ms-n1"></i>
                                     <!--end::Icon-->

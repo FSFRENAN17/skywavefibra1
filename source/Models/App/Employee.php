@@ -8,7 +8,8 @@ class Employee extends Model
 {
     public function __construct()
     {
-        parent::__construct("employee", ["id"], ["person_id", "role", "hire_date"]);
+        // employee table uses person_id as primary key (verify schema)
+        parent::__construct("employee", ["person_id"], ["person_id", "role", "hire_date"]);
     }
 
     /**
@@ -24,8 +25,10 @@ class Employee extends Model
         $account = (new \Source\Models\Account())
             ->find("person_id = :pid", "pid={$this->person_id}")
             ->fetch();
-
-        return $account ? $account->photo() : url("/shared/assets/images/avatar.jpg");
+        if ($account && method_exists($account, 'photo')) {
+            return $account->photo();
+        }
+        return url("/shared/assets/images/avatar.jpg");
     }
 
 
