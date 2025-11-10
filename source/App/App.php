@@ -6,6 +6,7 @@ use Source\Core\Controller;
 use Source\Models\Account;
 use Source\Models\App\Equipment;
 use Source\Models\App\Plan;
+use Source\Models\App\Contract;
 use Source\Models\App\SupportTicket;
 use Source\Models\App\TicketHistory;
 use Source\Models\App\TicketComment;
@@ -80,15 +81,44 @@ class App extends Controller
     }
 
     /** APP | Home */
-    public function home(): void
+/**
+     * APP HOME (PÁGINA PRINCIPAL DO CLIENTE)
+     */
+public function home(): void
     {
+        // Certifique-se de que no topo do App.php não há aliases conflitando (ex: use Source\Models\App\Contract as ContractModel)
+        
+        $user = Auth::account();
+        $current_plan = null;
+        $suggested_plan = null;
+
+        // USA O CAMINHO COMPLETO: \Source\Models\App\Contract()
+        $contract = (new \Source\Models\App\Contract())->find(
+            "customer_id = :uid AND status = 'active'",
+            "uid={$user->id}"
+        )->fetch();
+
+        if ($contract) {
+            $current_plan = $contract->plan();
+
+            if ($current_plan) {
+                // USA O CAMINHO COMPLETO: \Source\Models\App\Plan()
+                $suggested_plan = (new \Source\Models\App\Plan())->find(
+                    "price > :p",
+                    "p={$current_plan->price}"
+                )->order("price ASC")
+                 ->fetch();
+            }
+        }
+
         $this->renderPage("home", [
-            "active"      => "home",
-            "title"       => "Início",
-            "subtitle"    => "Bem-vindo(a)!",
+            "active"        => "home",
+            "title"         => "Início",
+            "subtitle"      => "Bem-vindo(a)!",
+            "current_plan"  => $current_plan,
+            "suggested_plan" => $suggested_plan
         ]);
     }
-
     // Equipamentos
     public function equipments(?array $data): void
     {
@@ -2473,6 +2503,136 @@ class App extends Controller
             "ticket" => $ticket
         ], "Chamado #{$ticket->id} - " . CONF_SITE_NAME);
     }
+
+
+/**
+ * Exibe a página de Contato/Orçamento para o cliente
+ * @return void
+ */
+public function contact(): void
+{
+    // Renderiza a view que criaremos no Passo 4
+    $this->renderPage("contact/main", [
+        "active"   => "contact",
+        "title"    => "Solicitar Orçamento Personalizado",
+        "subtitle" => "Entre em contato com nossa equipe comercial.",
+    ]);
+}
+
+// No source/App/App.php, verifique se você tem 'use Source\Models\Auth;'
+
+// No topo do App.php, se tiver, remova todos os 'use' statements que eu passei (exceto Auth).
+// Vamos usar o FQN (caminho completo) para depurar a raiz do erro.
+
+public function upgradePlan(array $data): void
+{
+    try {
+        $userId = Auth::account()->id;
+        $newPlanId = (int)($data['plan'] ?? 0);
+
+        // 1. Busca o Contrato Atual
+        $currentContract = (new Contract())->find("customer_id = :uid AND status = 'active'", "uid={$userId}")->fetch();
+
+        if (!$currentContract) {
+            $this->message->error("Cliente sem contrato ativo. Não é possível realizar o upgrade.")->toast()->flash();
+            redirect("/app");
+            return;
+        }
+
+        // 2. Busca Planos
+        $currentPlan = $currentContract->plan(); 
+        $newPlan = (new Plan())->findById($newPlanId); 
+        
+        if (!$currentPlan || !$newPlan) {
+             $this->message->error("O plano selecionado é inválido. Tente novamente.")->toast()->flash();
+             redirect("/app");
+             return;
+        }
+        
+        // 3. VALIDAÇÃO: Garante que é um UPGRADE (preço superior)
+        if ($newPlan->price <= $currentPlan->price) {
+            $this->message->warning("Você deve selecionar um plano de valor superior para realizar um upgrade.")->toast()->flash();
+            redirect("/app");
+            return;
+        }
+
+        // 4. Redireciona para a tela de pagamento / simulação.
+        redirect(url("/app/payment/plan/{$newPlanId}"));
+
+    } catch (\Throwable $e) {
+        $this->message->error("Ocorreu um erro inesperado. Tente novamente.")->toast()->flash();
+        redirect("/app");
+    }
+}
+
+public function paymentSimulate(array $data): void
+{
+    $planId = (int)($data['planId'] ?? 0);
+    $newPlan = (new \Source\Models\App\Plan())->findById($planId);
+
+    if (!$newPlan) {
+        $this->message->error("Plano de upgrade inválido.")->toast()->flash();
+        redirect("/app");
+        return;
+    }
+
+    $this->renderPage("plans/payment", [ // Nova View que vamos criar
+        "active"   => "home",
+        "title"    => "Simulação de Pagamento",
+        "subtitle" => "Conclua o pagamento para ativar o upgrade.",
+        "newPlan"  => $newPlan
+    ]);
+}
+
+
+// No source/App/App.php
+
+/**
+ * [ETAPA 3] - Processa a simulação de pagamento e atualiza o contrato no DB.
+ */
+public function upgradeProcess(array $data): void
+{
+    $userId = Auth::account()->id;
+    $newPlanId = (int)($data['planId'] ?? 0);
+
+    // 1. Busca o contrato atual e o novo plano (USANDO NOME CURTO: Contract e Plan)
+    $currentContract = (new Contract())->find("customer_id = :uid AND status = 'active'", "uid={$userId}")->fetch();
+    $newPlan = (new Plan())->findById($newPlanId);
+
+    if (!$currentContract || !$newPlan) {
+        $this->message->error("Falha ao localizar os dados do plano ou contrato. Tente o upgrade novamente.")->toast()->flash();
+        redirect("/app");
+        return;
+    }
+    
+    // 2. Atualização do Contrato (Simulação de Sucesso)
+    $currentContract->plan_id = $newPlanId;
+    
+    if (!$currentContract->save()) {
+        // Mensagem de erro mais robusta
+        $errorMsg = $currentContract->message()->getText() ?? "Erro desconhecido ao salvar o novo plano. Contate o suporte.";
+        $this->message->error("Erro ao salvar o novo plano: " . $errorMsg)->toast()->flash();
+        redirect("/app");
+        return;
+    }  
+
+    // 3. Sucesso! Redireciona para a tela final de sucesso.
+    $this->message->success("Parabéns! O seu plano foi atualizado para: {$newPlan->name}!")->toast()->flash();
+    redirect(url("/app/upgrade/success"));
+}
+
+/**
+ * Exibe a página de sucesso após o upgrade simulado
+ */
+public function upgradeSuccess(): void
+{
+    // A view 'plans/success' precisa ser criada na pasta themes/app/plans/
+    $this->renderPage("plans/success", [ 
+        "active"   => "home",
+        "title"    => "Upgrade Concluído",
+        "subtitle" => "Seu novo plano já está ativo!"
+    ]);
+}
 
 
     /** APP | Logout */

@@ -1,6 +1,10 @@
 <?php
 
 use Source\Models\Auth;
+use Source\Models\App\Plan; // <--- AQUI ESTÁ A CORREÇÃO
+
+// Busca todos os planos do banco, ordenados por preço, para o modal
+$modal_plans = (new Plan())->find()->order("price ASC")->fetch(true);
 ?>
 <!DOCTYPE html>
 
@@ -2893,403 +2897,164 @@ use Source\Models\Auth;
 	</div>
 	<!--end::Modal - New Card-->
 	<!--begin::Modal - Upgrade plan-->
-	<div class="modal fade" id="kt_modal_upgrade_plan" tabindex="-1" aria-hidden="true">
-		<!--begin::Modal dialog-->
-		<div class="modal-dialog modal-xl">
-			<!--begin::Modal content-->
-			<div class="modal-content rounded">
-				<!--begin::Modal header-->
+<div class="modal fade" id="kt_modal_upgrade_plan" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-xl">
+		<div class="modal-content rounded">
+			<form action="<?= url("app/upgrade/plan") ?>" method="post">
 				<div class="modal-header justify-content-end border-0 pb-0">
-					<!--begin::Close-->
 					<div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
 						<i class="ki-outline ki-cross fs-1"></i>
 					</div>
-					<!--end::Close-->
 				</div>
-				<!--end::Modal header-->
-				<!--begin::Modal body-->
 				<div class="modal-body pt-0 pb-15 px-5 px-xl-20">
-					<!--begin::Heading-->
 					<div class="mb-13 text-center">
-						<h1 class="mb-3">Upgrade a Plan</h1>
-						<div class="text-muted fw-semibold fs-5">If you need more info, please check
-							<a href="#" class="link-primary fw-bold">Pricing Guidelines</a>.
+						<h1 class="mb-3">FAZER UPGRADE DO PLANO</h1>
+						<div class="text-muted fw-semibold fs-5">Se você precisar de mais informações, por favor, verifique
+							<a href="#" class="link-primary fw-bold">Regras de Preços</a>.
 						</div>
 					</div>
-					<!--end::Heading-->
-					<!--begin::Plans-->
 					<div class="d-flex flex-column">
-						<!--begin::Nav group-->
-						<div class="nav-group nav-group-outline mx-auto" data-kt-buttons="true">
-							<button class="btn btn-color-gray-500 btn-active btn-active-secondary px-6 py-3 me-2 active" data-kt-plan="month">Monthly</button>
-							<button class="btn btn-color-gray-500 btn-active btn-active-secondary px-6 py-3" data-kt-plan="annual">Annual</button>
-						</div>
-						<!--end::Nav group-->
-						<!--begin::Row-->
-						<div class="row mt-10">
-							<!--begin::Col-->
-							<div class="col-lg-6 mb-10 mb-lg-0">
-								<!--begin::Tabs-->
-								<div class="nav flex-column">
-									<!--begin::Tab link-->
-									<label class="nav-link btn btn-outline btn-outline-dashed btn-color-dark btn-active btn-active-primary d-flex flex-stack text-start p-6 active mb-6" data-bs-toggle="tab" data-bs-target="#kt_upgrade_plan_startup">
-										<!--end::Description-->
-										<div class="d-flex align-items-center me-2">
-											<!--begin::Radio-->
-											<div class="form-check form-check-custom form-check-solid form-check-success flex-shrink-0 me-6">
-												<input class="form-check-input" type="radio" name="plan" checked="checked" value="startup" />
-											</div>
-											<!--end::Radio-->
-											<!--begin::Info-->
-											<div class="flex-grow-1">
-												<div class="d-flex align-items-center fs-2 fw-bold flex-wrap">Startup</div>
-												<div class="fw-semibold opacity-75">Best for startups</div>
-											</div>
-											<!--end::Info-->
-										</div>
-										<!--end::Description-->
-										<!--begin::Price-->
-										<div class="ms-5">
-											<span class="mb-2">$</span>
-											<span class="fs-3x fw-bold" data-kt-plan-price-month="39" data-kt-plan-price-annual="399">39</span>
-											<span class="fs-7 opacity-50">/
-												<span data-kt-element="period">Mon</span></span>
-										</div>
-										<!--end::Price-->
-									</label>
-									<!--end::Tab link-->
-									<!--begin::Tab link-->
-									<label class="nav-link btn btn-outline btn-outline-dashed btn-color-dark btn-active btn-active-primary d-flex flex-stack text-start p-6 mb-6" data-bs-toggle="tab" data-bs-target="#kt_upgrade_plan_advanced">
-										<!--end::Description-->
-										<div class="d-flex align-items-center me-2">
-											<!--begin::Radio-->
-											<div class="form-check form-check-custom form-check-solid form-check-success flex-shrink-0 me-6">
-												<input class="form-check-input" type="radio" name="plan" value="advanced" />
-											</div>
-											<!--end::Radio-->
-											<!--begin::Info-->
-											<div class="flex-grow-1">
-												<div class="d-flex align-items-center fs-2 fw-bold flex-wrap">Advanced</div>
-												<div class="fw-semibold opacity-75">Best for 100+ team size</div>
-											</div>
-											<!--end::Info-->
-										</div>
-										<!--end::Description-->
-										<!--begin::Price-->
-										<div class="ms-5">
-											<span class="mb-2">$</span>
-											<span class="fs-3x fw-bold" data-kt-plan-price-month="339" data-kt-plan-price-annual="3399">339</span>
-											<span class="fs-7 opacity-50">/
-												<span data-kt-element="period">Mon</span></span>
-										</div>
-										<!--end::Price-->
-									</label>
-									<!--end::Tab link-->
-									<!--begin::Tab link-->
-									<label class="nav-link btn btn-outline btn-outline-dashed btn-color-dark btn-active btn-active-primary d-flex flex-stack text-start p-6 mb-6" data-bs-toggle="tab" data-bs-target="#kt_upgrade_plan_enterprise">
-										<!--end::Description-->
-										<div class="d-flex align-items-center me-2">
-											<!--begin::Radio-->
-											<div class="form-check form-check-custom form-check-solid form-check-success flex-shrink-0 me-6">
-												<input class="form-check-input" type="radio" name="plan" value="enterprise" />
-											</div>
-											<!--end::Radio-->
-											<!--begin::Info-->
-											<div class="flex-grow-1">
-												<div class="d-flex align-items-center fs-2 fw-bold flex-wrap">Enterprise
-													<span class="badge badge-light-success ms-2 py-2 px-3 fs-7">Popular</span>
-												</div>
-												<div class="fw-semibold opacity-75">Best value for 1000+ team</div>
-											</div>
-											<!--end::Info-->
-										</div>
-										<!--end::Description-->
-										<!--begin::Price-->
-										<div class="ms-5">
-											<span class="mb-2">$</span>
-											<span class="fs-3x fw-bold" data-kt-plan-price-month="999" data-kt-plan-price-annual="9999">999</span>
-											<span class="fs-7 opacity-50">/
-												<span data-kt-element="period">Mon</span></span>
-										</div>
-										<!--end::Price-->
-									</label>
-									<!--end::Tab link-->
-									<!--begin::Tab link-->
-									<label class="nav-link btn btn-outline btn-outline-dashed btn-color-dark btn-active btn-active-primary d-flex flex-stack text-start p-6 mb-6" data-bs-toggle="tab" data-bs-target="#kt_upgrade_plan_custom">
-										<!--end::Description-->
-										<div class="d-flex align-items-center me-2">
-											<!--begin::Radio-->
-											<div class="form-check form-check-custom form-check-solid form-check-success flex-shrink-0 me-6">
-												<input class="form-check-input" type="radio" name="plan" value="custom" />
-											</div>
-											<!--end::Radio-->
-											<!--begin::Info-->
-											<div class="flex-grow-1">
-												<div class="d-flex align-items-center fs-2 fw-bold flex-wrap">Custom</div>
-												<div class="fw-semibold opacity-75">Requet a custom license</div>
-											</div>
-											<!--end::Info-->
-										</div>
-										<!--end::Description-->
-										<!--begin::Price-->
-										<div class="ms-5">
-											<a href="#" class="btn btn-sm btn-success">Contact Us</a>
-										</div>
-										<!--end::Price-->
-									</label>
-									<!--end::Tab link-->
+		
+                    <div class="nav-group nav-group-outline mx-auto" data-kt-buttons="true">
+                        <button class="btn btn-color-gray-500 btn-active btn-active-secondary px-6 py-3 me-2 active" data-kt-plan="month">Mensal</button>
+                        <button class="btn btn-color-gray-500 btn-active btn-active-secondary px-6 py-3" data-kt-plan="annual">Anual</button>
+                    </div>
+                    <div class="row mt-10">
+                        <div class="col-lg-6 mb-10 mb-lg-0">
+                            <div class="nav flex-column">
+                                
+                                <?php
+                                // LOOP 1: Abas dos Planos (Lado Esquerdo)
+                                if (!empty($modal_plans)):
+                                    foreach ($modal_plans as $index => $plan):
+                                ?>
+                                    <label class="nav-link btn btn-outline btn-outline-dashed btn-color-dark btn-active btn-active-primary d-flex flex-stack text-start p-6 mb-6 <?= ($index == 0) ? 'active' : '' ?>"
+                                        data-bs-toggle="tab" data-bs-target="#kt_upgrade_plan_<?= $plan->id; ?>">
+                                        
+                                        <div class="d-flex align-items-center me-2">
+                                            <div class="form-check form-check-custom form-check-solid form-check-success flex-shrink-0 me-6">
+                                                <input class="form-check-input" type="radio" name="plan" <?= ($index == 0) ? 'checked="checked"' : '' ?> value="<?= $plan->id; ?>" />
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex align-items-center fs-2 fw-bold flex-wrap"><?= $plan->name; ?></div>
+                                                <div class="fw-semibold opacity-75">
+                                                    <?= $plan->download_speed; ?> Mbps Down / <?= $plan->upload_speed; ?> Mbps Up
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="ms-5">
+                                            <span class="mb-2">R$</span>
+                                            <span class="fs-3x fw-bold" 
+                                                  data-kt-plan-price-month="<?= $plan->price; ?>" 
+                                                  data-kt-plan-price-annual="<?= ($plan->price * 12 * 0.9); ?>">
+                                                <?= number_format($plan->price, 2, ',', '.'); ?>
+                                            </span>
+                                            <span class="fs-7 opacity-50">/
+                                                <span data-kt-element="period">Mês</span>
+                                            </span>
+                                        </div>
+                                    </label>
+                                    <?php
+                                    endforeach;
+                                endif;
+                                ?>
+
+                                <label class="nav-link btn btn-outline btn-outline-dashed btn-color-dark btn-active btn-active-primary d-flex flex-stack text-start p-6 mb-6" data-bs-toggle="tab" data-bs-target="#kt_upgrade_plan_custom">
+                                    <div class="d-flex align-items-center me-2">
+                                        <div class="form-check form-check-custom form-check-solid form-check-success flex-shrink-0 me-6">
+                                            <input class="form-check-input" type="radio" name="plan" value="custom" />
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center fs-2 fw-bold flex-wrap">Custom</div>
+                                            <div class="fw-semibold opacity-75">Solicitar uma licença personalizada</div>
+                                        </div>
+                                        </div>
+                                    <div class="ms-5">
+                                        <a href="<?= url("app/contato") ?>" class="btn btn-sm btn-success">Contate-nos</a>
+                                    </div>
+                                    </label>
+                                </div>
+                            </div>
+                        <div class="col-lg-6">
+                            <div class="tab-content rounded h-100 bg-light p-10">
+                                
+                                <?php
+                                // LOOP 2: Conteúdo dos Planos (Lado Direito)
+                                if (!empty($modal_plans)):
+                                    foreach ($modal_plans as $index => $plan):
+                                ?>
+                                    <div class="tab-pane fade <?= ($index == 0) ? 'show active' : '' ?>" id="kt_upgrade_plan_<?= $plan->id; ?>">
+                                        <div class="pb-5">
+                                            <h2 class="fw-bold text-gray-900"><?= $plan->name; ?></h2>
+                                            <div class="text-muted fw-semibold"><?= $plan->description; ?></div>
+                                        </div>
+                                        <div class="pt-1">
+                                            <div class="d-flex align-items-center mb-7">
+                                                <span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Velocidade</span>
+                                                <span class="fw-semibold fs-5 text-gray-900"><?= $plan->speedFormatted(); ?></span>
+                                            </div>
+                                            <div class="d-flex align-items-center mb-7">
+                                                <span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Franquia</span>
+                                                <span class="fw-semibold fs-5 text-gray-900"><?= $plan->data_cap ? "{$plan->data_cap} GB" : 'Ilimitado'; ?></span>
+                                            </div>
+                                             <div class="d-flex align-items-center mb-7">
+                                                <span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Suporte Técnico</span>
+                                                <i class="ki-outline ki-check-circle fs-1 text-success"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <?php
+                                    endforeach;
+                                endif;
+                                ?>
+
+										<div class="tab-pane fade" id="kt_upgrade_plan_custom">
+								<div class="pb-5">
+									<h2 class="fw-bold text-gray-900">O que há no plano Personalizado?</h2>
+									<div class="text-muted fw-semibold">Soluções corporativas sob medida para sua empresa.</div>
 								</div>
-								<!--end::Tabs-->
-							</div>
-							<!--end::Col-->
-							<!--begin::Col-->
-							<div class="col-lg-6">
-								<!--begin::Tab content-->
-								<div class="tab-content rounded h-100 bg-light p-10">
-									<!--begin::Tab Pane-->
-									<div class="tab-pane fade show active" id="kt_upgrade_plan_startup">
-										<!--begin::Heading-->
-										<div class="pb-5">
-											<h2 class="fw-bold text-gray-900">What’s in Startup Plan?</h2>
-											<div class="text-muted fw-semibold">Optimal for 10+ team size and new startup</div>
-										</div>
-										<!--end::Heading-->
-										<!--begin::Body-->
-										<div class="pt-1">
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Up to 10 Active Users</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Up to 30 Project Integrations</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Analytics Module</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-muted flex-grow-1">Finance Module</span>
-												<i class="ki-outline ki-cross-circle fs-1"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-muted flex-grow-1">Accounting Module</span>
-												<i class="ki-outline ki-cross-circle fs-1"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-muted flex-grow-1">Network Platform</span>
-												<i class="ki-outline ki-cross-circle fs-1"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center">
-												<span class="fw-semibold fs-5 text-muted flex-grow-1">Unlimited Cloud Space</span>
-												<i class="ki-outline ki-cross-circle fs-1"></i>
-											</div>
-											<!--end::Item-->
-										</div>
-										<!--end::Body-->
-									</div>
-									<!--end::Tab Pane-->
-									<!--begin::Tab Pane-->
-									<div class="tab-pane fade" id="kt_upgrade_plan_advanced">
-										<!--begin::Heading-->
-										<div class="pb-5">
-											<h2 class="fw-bold text-gray-900">What’s in Startup Plan?</h2>
-											<div class="text-muted fw-semibold">Optimal for 100+ team size and grown company</div>
-										</div>
-										<!--end::Heading-->
-										<!--begin::Body-->
-										<div class="pt-1">
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Up to 10 Active Users</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Up to 30 Project Integrations</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Analytics Module</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Finance Module</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Accounting Module</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-muted flex-grow-1">Network Platform</span>
-												<i class="ki-outline ki-cross-circle fs-1"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center">
-												<span class="fw-semibold fs-5 text-muted flex-grow-1">Unlimited Cloud Space</span>
-												<i class="ki-outline ki-cross-circle fs-1"></i>
-											</div>
-											<!--end::Item-->
-										</div>
-										<!--end::Body-->
-									</div>
-									<!--end::Tab Pane-->
-									<!--begin::Tab Pane-->
-									<div class="tab-pane fade" id="kt_upgrade_plan_enterprise">
-										<!--begin::Heading-->
-										<div class="pb-5">
-											<h2 class="fw-bold text-gray-900">What’s in Startup Plan?</h2>
-											<div class="text-muted fw-semibold">Optimal for 1000+ team and enterpise</div>
-										</div>
-										<!--end::Heading-->
-										<!--begin::Body-->
-										<div class="pt-1">
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Up to 10 Active Users</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Up to 30 Project Integrations</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Analytics Module</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Finance Module</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Accounting Module</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Network Platform</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Unlimited Cloud Space</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-										</div>
-										<!--end::Body-->
-									</div>
-									<!--end::Tab Pane-->
-									<!--begin::Tab Pane-->
-									<div class="tab-pane fade" id="kt_upgrade_plan_custom">
-										<!--begin::Heading-->
-										<div class="pb-5">
-											<h2 class="fw-bold text-gray-900">What’s in Startup Plan?</h2>
-											<div class="text-muted fw-semibold">Optimal for corporations</div>
-										</div>
-										<!--end::Heading-->
-										<!--begin::Body-->
-										<div class="pt-1">
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Unlimited Users</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Unlimited Project Integrations</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Analytics Module</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Finance Module</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Accounting Module</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center mb-7">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Network Platform</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-											<!--begin::Item-->
-											<div class="d-flex align-items-center">
-												<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Unlimited Cloud Space</span>
-												<i class="ki-outline ki-check-circle fs-1 text-success"></i>
-											</div>
-											<!--end::Item-->
-										</div>
-										<!--end::Body-->
-									</div>
-									<!--end::Tab Pane-->
+								<div class="pt-1">
+								<div class="d-flex align-items-center mb-7">
+									<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Link Dedicado (Fibra)</span>
+									<i class="ki-outline ki-check-circle fs-1 text-success"></i>
 								</div>
-								<!--end::Tab content-->
+								<div class="d-flex align-items-center mb-7">
+									<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Velocidade Simétrica (Upload/Download)</span>
+									<i class="ki-outline ki-check-circle fs-1 text-success"></i>
+								</div>
+							<div class="d-flex align-items-center mb-7">
+								<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">IP Fixo (Bloco /29)</span>
+								<i class="ki-outline ki-check-circle fs-1 text-success"></i>
 							</div>
-							<!--end::Col-->
-						</div>
-						<!--end::Row-->
-					</div>
+							<div class="d-flex align-items-center mb-7">
+								<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">SLA Premium (Garantia de 99.9%)</span>
+								<i class="ki-outline ki-check-circle fs-1 text-success"></i>
+							</div>
+							<div class="d-flex align-items-center mb-7">
+								<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Suporte Técnico Prioritário 24/7</span>
+								<i class="ki-outline ki-check-circle fs-1 text-success"></i>
+							</div>
+							<div class="d-flex align-items-center mb-7">
+								<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Monitoramento de Rede Proativo</span>
+								<i class="ki-outline ki-check-circle fs-1 text-success"></i>
+							</div>
+							<div class="d-flex align-items-center">
+								<span class="fw-semibold fs-5 text-gray-700 flex-grow-1">Soluções de Firewall Gerenciado</span>
+								<i class="ki-outline ki-check-circle fs-1 text-success"></i>
+							</div>
+							</div>
+    </div>
 					<!--end::Plans-->
 					<!--begin::Actions-->
 					<div class="d-flex flex-center flex-row-fluid pt-12">
-						<button type="reset" class="btn btn-light me-3" data-bs-dismiss="modal">Cancel</button>
-						<button type="submit" class="btn btn-primary" id="kt_modal_upgrade_plan_btn">
-							<!--begin::Indicator label-->
-							<span class="indicator-label">Upgrade Plan</span>
-							<!--end::Indicator label-->
-							<!--begin::Indicator progress-->
-							<span class="indicator-progress">Please wait...
+						<button type="reset" class="btn btn-light me-3" data-bs-dismiss="modal">Cancelar</button>
+						<button type="submit" class="btn btn-primary">
+							<span class="indicator-label">Upgrade Plano</span>
+							<span class="indicator-progress">Aguarde...
 								<span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
-							<!--end::Indicator progress-->
-						</button>
+							</button>
+					</div>
 					</div>
 					<!--end::Actions-->
 				</div>

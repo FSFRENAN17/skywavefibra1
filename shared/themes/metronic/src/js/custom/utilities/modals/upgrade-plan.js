@@ -4,25 +4,25 @@
 var KTModalUpgradePlan = function () {
     // Private variables
     var modal;
-	var planPeriodMonthButton;
-	var planPeriodAnnualButton;
+    var planPeriodMonthButton;
+    var planPeriodAnnualButton;
     var planUpgradeButton;
 
     // Private functions
-	var changePlanPrices = function(type) {
-		var items = [].slice.call(modal.querySelectorAll('[data-kt-plan-price-month]'));
+    var changePlanPrices = function(type) {
+        var items = [].slice.call(modal.querySelectorAll('[data-kt-plan-price-month]'));
 
-		items.map(function (item) {
-			var monthPrice = item.getAttribute('data-kt-plan-price-month');
-			var annualPrice = item.getAttribute('data-kt-plan-price-annual');
+        items.map(function (item) {
+            var monthPrice = item.getAttribute('data-kt-plan-price-month');
+            var annualPrice = item.getAttribute('data-kt-plan-price-annual');
 
-			if ( type === 'month' ) {
-				item.innerHTML = monthPrice;
-			} else if ( type === 'annual' ) {
-				item.innerHTML = annualPrice;
-			}
-		});
-	}
+            if ( type === 'month' ) {
+                item.innerHTML = monthPrice;
+            } else if ( type === 'annual' ) {
+                item.innerHTML = annualPrice;
+            }
+        });
+    }
 
     var handlePlanPeriodSelection = function() {
         // Handle period change
@@ -35,7 +35,7 @@ var KTModalUpgradePlan = function () {
             changePlanPrices('month');
         });
 
-		planPeriodAnnualButton.addEventListener('click', function (e) {
+        planPeriodAnnualButton.addEventListener('click', function (e) {
             e.preventDefault();
 
             planPeriodMonthButton.classList.remove('active');
@@ -56,26 +56,26 @@ var KTModalUpgradePlan = function () {
             var el = this;
 
             swal.fire({
-                text: "Are you sure you would like to upgrade to selected plan ?",
+                text: "Tem certeza de que gostaria de fazer o upgrade para o plano selecionado?", // TEXTO TRADUZIDO
                 icon: "warning",
                 buttonsStyling: false,
                 showDenyButton: true,
-                confirmButtonText: "Yes",
-                denyButtonText: 'No',
+                confirmButtonText: "Sim", // TEXTO TRADUZIDO
+                denyButtonText: 'Não', // TEXTO TRADUZIDO
                 customClass: {
                     confirmButton: "btn btn-primary",
                     denyButton: "btn btn-light-danger"
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    el.setAttribute('data-kt-indicator', 'on');            
+                    el.setAttribute('data-kt-indicator', 'on'); 
                     el.disabled = true;
 
                     setTimeout(function() {
                         Swal.fire({
-                            text: 'Your subscription plan has been successfully upgraded', 
+                            text: 'Seu plano de assinatura foi atualizado com sucesso', // TEXTO TRADUZIDO
                             icon: 'success',
-                            confirmButtonText: "Ok",
+                            confirmButtonText: "Ok", // TEXTO TRADUZIDO
                             buttonsStyling: false,
                             customClass: {
                                 confirmButton: "btn btn-light-primary"
@@ -86,7 +86,7 @@ var KTModalUpgradePlan = function () {
 
                     }, 2000);
                 } 
-            });            
+            }); 
         });
     }
 
@@ -97,11 +97,11 @@ var KTModalUpgradePlan = function () {
             modal = document.querySelector('#kt_modal_upgrade_plan');
 
             if (!modal) {
-				return;
-			}
+                return;
+            }
 
-			planPeriodMonthButton = modal.querySelector('[data-kt-plan="month"]');
-			planPeriodAnnualButton = modal.querySelector('[data-kt-plan="annual"]');
+            planPeriodMonthButton = modal.querySelector('[data-kt-plan="month"]');
+            planPeriodAnnualButton = modal.querySelector('[data-kt-plan="annual"]');
             planUpgradeButton = document.querySelector('#kt_modal_upgrade_plan_btn');
 
             // Handlers

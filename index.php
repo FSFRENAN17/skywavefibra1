@@ -52,6 +52,7 @@ $route->get('/termos', 'Web:terms');
 $route->get('/privacidade', 'Web:privacy');
 
 
+
 /**
  * APP
  */
@@ -101,9 +102,14 @@ $route->post('/users/roles',        'App:saveUserRolesPost');
 
 // Planos
 $route->get('/planos', 'App:plans');
-$route->get('/plano/{id}', 'App:planForm'); // editar plano
-$route->get('/plano/novo', 'App:planForm'); // novo plano
+$route->get('/plano/{id}', 'App:planForm'); 
+$route->get('/plano/novo', 'App:planForm'); 
 $route->post('/plans/save', 'App:savePlan');
+$route->post('/upgrade/plan', 'App:upgradePlan');             // Rota para validar o Upgrade
+$route->get('/payment/plan/{planId}', 'App:paymentSimulate'); // Rota para tela de simulação
+$route->post('/upgrade/process', 'App:upgradeProcess');       // Rota para confirmar o contrato
+$route->get('/app/contato', 'App:contact');                   // Rota de Contato
+$route->get('/upgrade/success', 'App:upgradeSuccess');
 
 // CLientes
 $route->get('/clientes', 'App:customers');
@@ -118,6 +124,8 @@ $route->post('/clientes/buscar', 'App:searchClientByCpf');
 // AJAX: salvar cliente / alocar equipamento / definir plano
 $route->post('/clientes/save', 'App:saveCustomer');
 
+// Nova Rota de Contato para Orçamento
+$route->get('/contato', 'App:contact');
 // Chamados (Support Tickets)
 $route->get('/chamados', 'App:tickets');
 $route->get('/chamados/{page}/{limit}', 'App:tickets');

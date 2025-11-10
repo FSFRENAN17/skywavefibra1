@@ -104,40 +104,24 @@
 <h5 class="mt-5 bg-primary p-2 rounded">View do cliente <small class="ms-2 text-muted">Só aparece para quem for cliente</small></h5>
 <hr>
 
-<!--begin::Row-->
+<?php if ($current_plan && $suggested_plan): ?>
 <div class="row g-5 g-xxl-10">
-    <!--begin::Col-->
     <div class="col-xxl-4 mb-xxl-10">
-        <!--begin::Card Widget 22-->
         <div class="card card-reset mb-5 mb-xl-10">
-            <!--begin::Body-->
             <div class="card-body p-0">
-                <!--begin::Row-->
                 <div class="row g-5 g-lg-9">
-                    <!--begin::Col-->
                     <div class="col-6">
-                        <!--begin::Card-->
                         <div class="card card-shadow">
-                            <!--begin::Body-->
                             <div class="card-body p-0">
-                                <!--begin::Items-->
-                                <a href='apps/ecommerce/catalog/products.html' class="btn btn-active-color-primary px-7 py-6 text-start w-100">
-                                    <!--begin::Icon-->
+                                <a href='#' class="btn btn-active-color-primary px-7 py-6 text-start w-100">
                                     <i class="ki-outline ki-element-11 fs-2x fs-lg-2hx text-gray-500 ms-n1"></i>
-                                    <!--end::Icon-->
-                                    <!--begin::Desc-->
                                     <div class="fw-bold fs-5 pt-4">Meu Plano</div>
-                                    <!--end::Desc-->
                                 </a>
-                                <!--end::Items-->
+                                </div>
                             </div>
-                            <!--end::Body-->
                         </div>
-                        <!--end::Card-->
-                    </div>
-                    <!--end::Col-->
-                    <!--begin::Col-->
                     <div class="col-6">
+                         </div>
                         <!--begin::Card-->
                         <div class="card card-shadow">
                             <!--begin::Body-->
@@ -160,133 +144,66 @@
                     <!--end::Col-->
                     <!--begin::Col-->
                     <div class="col-6">
-                        <!--begin::Card-->
                         <div class="card card-shadow">
-                            <!--begin::Body-->
                             <div class="card-body p-0">
-                                <!--begin::Items-->
-                                <a href='apps/file-manager/folders.html' class="btn btn-active-color-primary px-7 py-6 text-start w-100">
-                                    <!--begin::Icon-->
+                                <a href='#' data-bs-toggle="modal" data-bs-target="#kt_modal_upgrade_plan" class="btn btn-active-color-primary px-7 py-6 text-start w-100">
                                     <i class="ki-outline ki-rocket fs-2x fs-lg-2hx text-gray-500 ms-n1"></i>
-                                    <!--end::Icon-->
-                                    <!--begin::Desc-->
                                     <div class="fw-bold fs-5 pt-4">Upgrade</div>
-                                    <!--end::Desc-->
                                 </a>
-                                <!--end::Items-->
                             </div>
-                            <!--end::Body-->
                         </div>
-                        <!--end::Card-->
                     </div>
-                    <!--end::Col-->
-                    <!--begin::Col-->
                     <div class="col-6">
-                        <!--begin::Card-->
-                        <div class="card card-shadow">
-                            <!--begin::Body-->
-                            <div class="card-body p-0">
-                                <!--begin::Items-->
-                                <a href='apps/subscriptions/list.html' class="btn btn-active-color-primary px-7 py-6 text-start w-100">
-                                    <!--begin::Icon-->
-                                    <i class="ki-outline ki-chart-pie-3 fs-2x fs-lg-2hx text-gray-500 ms-n1"></i>
-                                    <!--end::Icon-->
-                                    <!--begin::Desc-->
-                                    <div class="fw-bold fs-5 pt-4">Status</div>
-                                    <!--end::Desc-->
-                                </a>
-                                <!--end::Items-->
-                            </div>
-                            <!--end::Body-->
                         </div>
-                        <!--end::Card-->
                     </div>
-                    <!--end::Col-->
-                </div>
             </div>
-            <!--end::Body-->
+            </div>
         </div>
-        <!--end::Card Widget 22-->
-    </div>
-    <!--end::Col-->
-    <!--begin::Col-->
     <div class="col-xxl-8 mb-5 mb-xl-10">
-        <!--begin::Engage widget 14-->
         <div class="card border-0 mb-5 mb-xl-11" data-bs-theme="light" style="background-color: #844AFF">
-            <!--begin::Body-->
             <div class="card-body py-0">
-                <!--begin::Row-->
                 <div class="row align-items-center lh-1 h-100">
-                    <!--begin::Col-->
                     <div class="col-7 ps-xl-10 pe-5">
-                        <!--begin::Title-->
                         <div class="fs-2qx fw-bold text-white mb-6">Faça agora o Upgrade</div>
-                        <!--end::Title-->
-                        <!--begin::Text-->
                         <span class="fw-semibold text-white fs-6 mb-10 d-block opacity-75">Precisa de mais velocidade? Deixa isso com a gente!</span>
-                        <!--end::Text-->
-                        <!--begin::Items-->
+                        
                         <div class="d-flex align-items-center flex-wrap d-grid gap-2 mb-9">
-                            <!--begin::Item-->
                             <div class="d-flex align-items-center me-5 me-xl-13">
-                                <!--begin::Symbol-->
                                 <div class="symbol symbol-30px symbol-circle me-3">
                                     <span class="symbol-label" style="background: rgba(255, 255, 255, 0.1)">
                                         <i class="ki-outline ki-abstract-41 fs-5 text-white"></i>
                                     </span>
                                 </div>
-                                <!--end::Symbol-->
-                                <!--begin::Info-->
                                 <div class="text-white">
                                     <span class="fw-semibold d-block fs-8 opacity-75 mb-2">Seu plano atual</span>
-                                    <span class="fw-bold fs-7">100mb</span>
+                                    <span class="fw-bold fs-7"><?= $current_plan->name; ?></span>
                                 </div>
-                                <!--end::Info-->
                             </div>
-                            <!--end::Item-->
-                            <!--begin::Item-->
                             <div class="d-flex align-items-center">
-                                <!--begin::Symbol-->
                                 <div class="symbol symbol-30px symbol-circle me-3">
                                     <span class="symbol-label" style="background: rgba(255, 255, 255, 0.1)">
                                         <i class="ki-outline ki-abstract-26 fs-5 text-white"></i>
                                     </span>
                                 </div>
-                                <!--end::Symbol-->
-                                <!--begin::Info-->
                                 <div class="text-white">
-                                    <span class="fw-semibold opacity-75 d-block fs-3 mb-2">Upgrade</span>
-                                    <span class="fw-bold fs-2">500mb</span>
+                                    <span class="fw-semibold opacity-75 d-block fs-3 mb-2">Upgrade para</span>
+                                    <span class="fw-bold fs-2"><?= $suggested_plan->name; ?></span>
                                 </div>
-                                <!--end::Info-->
                             </div>
-                            <!--end::Item-->
-                        </div>
-                        <!--end::Items-->
-                        <!--begin::Action-->
+                            </div>
                         <div class="d-flex d-grid gap-2">
                             <a href="#" class="btn btn-success me-lg-2" data-bs-toggle="modal" data-bs-target="#kt_modal_upgrade_plan">Faça agora o Upgrade</a>
                         </div>
-                        <!--end::Action-->
-                    </div>
-                    <!--end::Col-->
-                    <!--begin::Col-->
+                        </div>
                     <div class="col-5 pt-5 pt-lg-15">
-                        <!--begin::Illustration-->
                         <div class="bgi-no-repeat bgi-size-contain bgi-position-x-end bgi-position-y-bottom h-325px" style="background-image:url('assets/media/svg/illustrations/easy/8.svg"></div>
-                        <!--end::Illustration-->
                     </div>
-                    <!--end::Col-->
+                    </div>
                 </div>
-                <!--end::Row-->
             </div>
-            <!--end::Body-->
         </div>
-        <!--end::Engage widget 14-->
     </div>
-    <!--end::Col-->
-</div>
-<!--end::Row-->
+<?php endif; ?>
 
 <h5 class="mt-5 bg-primary p-2 rounded">View do funcionário <small class="ms-2 text-muted">Para funcionários</small></h5>
 <hr>
