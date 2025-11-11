@@ -670,6 +670,21 @@ class Web extends Controller
         ]);
     }
 
+    /** WEB | Status */
+    public function status(): void
+    {
+        $head = $this->seo->render(
+            CONF_SITE_NAME . " - Status do Serviço",
+            CONF_SITE_DESC,
+            url("/status"),
+            url("/shared/assets/images/share.png")
+        );
+
+        echo $this->view->render("status", [
+            "head" => $head
+        ]);
+    }
+
     /**
      * APP/WEB | LOGOUT
      * @return void

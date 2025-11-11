@@ -389,6 +389,14 @@ function strBytes(int $bytes, int $precision = 2): string
     return round($bytes, $precision) . ' ' . $units[$pow];
 }
 
+function contact_value(int $personId, string $type): ?string
+{
+    $contact = (new \Source\Models\App\Contact())
+        ->find("person_id = :pid AND contact_type = :type", "pid={$personId}&type={$type}")
+        ->fetch();
+    return $contact ? $contact->value : null;
+}
+
 
 /**
  * ###############

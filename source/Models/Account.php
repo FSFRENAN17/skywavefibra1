@@ -28,6 +28,16 @@ class Account extends Model
         return $person ? $person->full_name : $this->email;
     }
 
+    public function photo(): string
+    {
+        if ($this->avatar && file_exists(__DIR__ . "/../../" . CONF_UPLOAD_DIR . "/{$this->avatar}")) {
+            return image($this->avatar, 360, 360);
+        }
+
+        return url("/shared/assets/images/avatar.jpg");
+    }
+
+
     /**
      * Inicializa a conta
      */
@@ -50,6 +60,41 @@ class Account extends Model
         $find = $this->find("email = :email", "email={$email}", $columns);
         return $find->fetch();
     }
+
+    // Dentro de Source\Models\Account.php
+    public function userType(): array
+    {
+        $person = $this->person();
+        if (!$person) {
+            return ['Usuário', 'secondary'];
+        }
+
+        $personId = $person->id;
+
+        $isCustomer = (new \Source\Models\App\Customer())
+            ->find("person_id = :pid", "pid={$personId}")
+            ->count() > 0;
+
+        $isEmployee = (new \Source\Models\App\Employee())
+            ->find("person_id = :pid", "pid={$personId}")
+            ->count() > 0;
+
+        // --- Decisões ---
+        if ($isCustomer && $isEmployee) {
+            return ['Cliente e Colaborador', 'info'];
+        }
+
+        if ($isEmployee) {
+            return ['Colaborador', 'primary'];
+        }
+
+        if ($isCustomer) {
+            return ['Cliente', 'success'];
+        }
+
+        return ['Usuário', 'secondary'];
+    }
+
 
     /**
      * Salva ou atualiza credenciais
