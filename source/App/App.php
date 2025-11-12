@@ -85,10 +85,7 @@ class App extends Controller
         ]);
     }
 
-    // =======================================================
-    // MÉTODO PARA STATUS DE SERVIÇO (AJUSTADO PARA A VIEW 'status')
-    // =======================================================
-    /** APP | Status do Serviço */
+    
     public function serviceStatus(): void
     {
         // ATENÇÃO: A VIEW CHAMA AGORA "status", esperando o arquivo 'status.php'
